@@ -5,8 +5,17 @@ import { useAppSelector } from "../../../app/store/store";
 import { useDispatch } from "react-redux";
 import { createEvent, updateEvent } from "../eventSlice";
 import { createId } from "@paralleldrive/cuid2";
+import { Controller, FieldValues, useForm } from "react-hook-form";
+import { categoryOptions } from "./categoryOptions";
 
 export default function EventForm() {
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm({ mode: "onTouched" });
   let { id } = useParams();
   const event = useAppSelector((state) =>
     state.events.events.find((x) => x.id === id)
@@ -14,99 +23,93 @@ export default function EventForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const initialEventData = event ?? {
-    title: "",
-    category: "",
-    description: "",
-    city: "",
-    venue: "",
-    date: "",
-  };
-
-  const [eventData, setEventData] = useState(initialEventData);
-
-  function onSubmit() {
-    id = id ?? createId();
-    event
-      ? dispatch(updateEvent({ ...event, ...eventData }))
-      : dispatch(
-          createEvent({
-            ...eventData,
-            id,
-            hostedBy: "Bob",
-            hostPhotoURL: "",
-            attendees: [],
-          })
-        );
-
-    navigate(`/events/${id}`);
+  function onSubmit(data: FieldValues) {
+    // id = id ?? createId();
+    // event
+    //   ? dispatch(updateEvent({ ...event, ...eventData }))
+    //   : dispatch(
+    //       createEvent({
+    //         ...eventData,
+    //         id,
+    //         hostedBy: "Bob",
+    //         hostPhotoURL: "",
+    //         attendees: [],
+    //       })
+    //     );
+    // navigate(`/events/${id}`);
   }
 
-  function handleInputChanges(e: ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target;
-    setEventData({ ...eventData, [name]: value });
-  }
+  // function handleInputChanges(e: ChangeEvent<HTMLInputElement>) {
+  //   const { name, value } = e.target;
+  //   setEventData({ ...eventData, [name]: value });
+  // }
 
   return (
     <>
       <Segment clearing>
-        <Header content={event ? "Update Event" : "Create Event"} />
-        <Form onSubmit={onSubmit}>
-          <Form.Field>
-            <input
-              type="text"
-              placeholder="Event title"
-              name="title"
-              value={eventData.title}
-              onChange={(e) => handleInputChanges(e)}
-            />
-          </Form.Field>
-          <Form.Field>
-            <input
-              type="text"
-              placeholder="Category"
-              name="category"
-              value={eventData.category}
-              onChange={(e) => handleInputChanges(e)}
-            />
-          </Form.Field>
-          <Form.Field>
-            <input
-              type="text"
-              placeholder="Description"
-              name="description"
-              value={eventData.description}
-              onChange={(e) => handleInputChanges(e)}
-            />
-          </Form.Field>
-          <Form.Field>
-            <input
-              type="text"
-              placeholder="City"
-              name="city"
-              value={eventData.city}
-              onChange={(e) => handleInputChanges(e)}
-            />
-          </Form.Field>
-          <Form.Field>
-            <input
-              type="text"
-              placeholder="Venue"
-              name="venue"
-              value={eventData.venue}
-              onChange={(e) => handleInputChanges(e)}
-            />
-          </Form.Field>
-          <Form.Field>
-            <input
-              type="date"
-              placeholder="Date"
-              name="date"
-              value={eventData.date}
-              onChange={(e) => handleInputChanges(e)}
-            />
-          </Form.Field>
-          <Button type="submit" floated="right" positive content="Submit" />
+        <Header content="Event details" sub color="teal" />
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <Form.Input
+            placeholder="Event title"
+            defaultValue={event?.title || ""}
+            {...register("title", { required: "Title is required" })}
+            error={errors.title && errors.title.message}
+          />
+          <Controller
+            name="category"
+            control={control}
+            rules={{ required: "Category is required" }}
+            defaultValue={event?.category}
+            render={({ field }) => (
+              <Form.Select
+                options={categoryOptions}
+                placeholder="Category"
+                clearable
+                {...field}
+                onChange={(_, d) =>
+                  setValue("category", d.value, { shouldValidate: true })
+                }
+                error={errors.category && errors.category.message}
+              />
+            )}
+          />
+
+          <Form.TextArea
+            placeholder="Description"
+            defaultValue={event?.description || ""}
+            {...register("description", {
+              required: "Description is required",
+            })}
+            error={errors.description && errors.description.message}
+          />
+          <Header content="Location details" sub color="teal" />
+          <Form.Input
+            placeholder="City"
+            defaultValue={event?.city || ""}
+            {...register("city", { required: "City is required" })}
+            error={errors.city && errors.city.message}
+          />
+          <Form.Input
+            placeholder="Venue"
+            defaultValue={event?.venue || ""}
+            {...register("venue", { required: "Venue is required" })}
+            error={errors.venue && errors.venue.message}
+          />
+          <Form.Input
+            type="date"
+            placeholder="Date"
+            defaultValue={event?.date || ""}
+            {...register("date", { required: "Date is required" })}
+            error={errors.date && errors.date.message}
+          />
+          <Button
+            disabled={!isValid}
+            type="submit"
+            floated="right"
+            positive
+            content="Submit"
+            loading={isSubmitting}
+          />
           <Button
             type="button"
             floated="right"
