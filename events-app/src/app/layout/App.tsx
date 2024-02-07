@@ -1,34 +1,22 @@
 import { Container } from "semantic-ui-react";
-import EventDashboard from "../../features/events/eventDashboard/EventDashboard";
 import NavBar from "./nav/NavBar";
-import { useState } from "react";
-import { AppEvent } from "../types/event";
+import { Outlet, useLocation } from "react-router-dom";
+import Home from "../../features/home/Home";
 
 function App() {
-  const [formOpen, setFormOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<AppEvent | null>(null);
-
-  function handleSelectedEvent(event: AppEvent | null) {
-    setSelectedEvent(event);
-    setFormOpen(true);
-  }
-
-  function handleCreateFormOpen() {
-    setSelectedEvent(null);
-    setFormOpen(true);
-  }
-
+  const location = useLocation();
   return (
     <>
-      <NavBar handleCreateFormOpen={handleCreateFormOpen} />
-      <Container className="main">
-        <EventDashboard
-          formOpen={formOpen}
-          setFormOpen={setFormOpen}
-          selectedEvent={selectedEvent}
-          handleSelectedEvent={handleSelectedEvent}
-        />
-      </Container>
+      {location.pathname === "/" ? (
+        <Home />
+      ) : (
+        <>
+          <NavBar />
+          <Container className="main">
+            <Outlet />
+          </Container>
+        </>
+      )}
     </>
   );
 }

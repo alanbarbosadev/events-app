@@ -1,22 +1,9 @@
 import { Button, Form, Header, Segment } from "semantic-ui-react";
 import { ChangeEvent, useState } from "react";
-import { AppEvent } from "../../../app/types/event";
-import { createId } from "@paralleldrive/cuid2";
+import { Link } from "react-router-dom";
 
-type Props = {
-  setFormOpen: (value: boolean) => void;
-  addEvent: (value: AppEvent) => void;
-  selectedEvent: AppEvent | null;
-  updateEvent: (updatedEvent: AppEvent) => void;
-};
-
-export default function EventForm({
-  setFormOpen,
-  addEvent,
-  selectedEvent,
-  updateEvent,
-}: Props) {
-  const initialEventData = selectedEvent ?? {
+export default function EventForm() {
+  const initialEventData = {
     title: "",
     category: "",
     description: "",
@@ -28,16 +15,17 @@ export default function EventForm({
   const [eventData, setEventData] = useState(initialEventData);
 
   function onSubmit() {
-    selectedEvent
-      ? updateEvent({ ...selectedEvent, ...eventData })
-      : addEvent({
-          ...eventData,
-          id: createId(),
-          hostedBy: "Bob",
-          hostPhotoURL: "",
-          attendees: [],
-        });
-    setFormOpen(false);
+    console.log(eventData);
+    // selectedEvent
+    //   ? updateEvent({ ...selectedEvent, ...eventData })
+    //   : addEvent({
+    //       ...eventData,
+    //       id: createId(),
+    //       hostedBy: "Bob",
+    //       hostPhotoURL: "",
+    //       attendees: [],
+    //     });
+    // setFormOpen(false);
   }
 
   function handleInputChanges(e: ChangeEvent<HTMLInputElement>) {
@@ -48,7 +36,7 @@ export default function EventForm({
   return (
     <>
       <Segment clearing>
-        <Header content={selectedEvent ? "Update Event" : "Create Event"} />
+        <Header content={"Create Event"} />
         <Form onSubmit={onSubmit}>
           <Form.Field>
             <input
@@ -109,7 +97,8 @@ export default function EventForm({
             type="button"
             floated="right"
             content="Cancel"
-            onClick={() => setFormOpen(false)}
+            as={Link}
+            to="/events"
           />
         </Form>
       </Segment>
